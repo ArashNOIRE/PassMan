@@ -73,6 +73,6 @@ def main(Unum, Usym, Uupr,Ulow,Ulen):
         print("Your password is:", password)
 
 print ("Welcome to my 2000's password generator!")
-
-# Make it like API
-# Rename Vars
+# Todo:
+#   Rename Vars
+#   Make it like an API
