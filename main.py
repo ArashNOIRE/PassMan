@@ -1,2 +1,2 @@
 import PassGen
-PassGen.main("y","n","y","y",16)
+print(PassGen.main("y","y","n","n",16))
