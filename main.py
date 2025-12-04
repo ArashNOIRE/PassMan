@@ -1,10 +1,10 @@
 import PassGen
 import Pass2File
-import hashlib
+from Pass2File import KEY_FILE, PASS_FILE, file_hash, hash_password
 
-# Simple hashing function for passwords
-def hash_password(pwd):
-    return hashlib.sha256(pwd.encode()).hexdigest()
+
+# Making dependencys between key.key master.key and passwords.enc
+
 
 MASTER_FILE = "master.key"
 
@@ -20,10 +20,15 @@ def setup_master():
         print("Passwords do not match. Exiting.")
         exit()
 
+    master_hash = hash_password(pwd) 
+    key_hash = "none"
+
     with open(MASTER_FILE, "w") as f:
-        f.write(hash_password(pwd))
+        f.write(master_hash + "\n")
+        f.write(key_hash)
 
     print("Master password created!")
+
 
 def verify_master():
     import os
@@ -97,7 +102,9 @@ def search_password(website):
 def main():
     global Passwords
     what = input("What do you want to do? \n(add, remove, see, rename, change, search, exit): ")
+    Pass2File.verify_integrity()
     Passwords = Pass2File.load_passwords()
+
 
 
     if what == "add":
