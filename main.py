@@ -26,9 +26,6 @@ def see_password():
         print("Cancelled.")
         return
 
-
-
-
 def remove_password(website):
     if website in Passwords:
         del Passwords[website]
