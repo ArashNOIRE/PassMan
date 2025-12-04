@@ -18,8 +18,15 @@ def add_password(website, password):
     print(f"Password: {password} for {website} added.")
 
 def see_password():
-    for site, pwd in Passwords.items():
-        print(f"{site}: {pwd}")
+    sure=input("Are you sure you want to see all passwords? (y/n): ")
+    if sure.lower() == "y":
+            for site, pwd in Passwords.items():
+                print(f"{site}: {pwd}")
+    else:    
+        print("Cancelled.")
+        return
+
+
 
 
 def remove_password(website):

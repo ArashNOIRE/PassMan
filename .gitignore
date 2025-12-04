@@ -32,4 +32,5 @@ build/
 *.log
 
 # PassMan specific
-passes.json
+passwords.enc
+key.key
