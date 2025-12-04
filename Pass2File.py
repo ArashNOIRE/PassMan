@@ -7,7 +7,7 @@ KEY_FILE = "key.key"
 PASS_FILE = "passwords.enc"
 MASTER_FILE = "master.key"
 
-# --- کمکی‌ها ---
+# --- Helpers ---
 def hash_password(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
 
@@ -17,7 +17,7 @@ def file_hash(path):
     with open(path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
 
-# --- کلید ---
+# --- Key ---
 def load_key():
     if os.path.exists(KEY_FILE):
         with open(KEY_FILE, "rb") as f:
@@ -43,13 +43,13 @@ def verify_integrity():
     with open(MASTER_FILE, "r") as f:
         lines = f.read().splitlines()
 
-    # خط دوم: hash کلید
+    #Hash key.key
     expected_key_hash = lines[1] if len(lines) > 1 and lines[1] != "none" else None
     if expected_key_hash and expected_key_hash != file_hash(KEY_FILE):
         print("Error: key.key modified or invalid!")
         exit()
 
-    # خط سوم: hash پسوردها
+    #Hash passwords.enc
     expected_pass_hash = lines[2] if len(lines) > 2 and lines[2] != "none" else None
     if expected_pass_hash and os.path.exists(PASS_FILE):
         if expected_pass_hash != file_hash(PASS_FILE):
@@ -57,18 +57,18 @@ def verify_integrity():
             exit()
 
 def update_master_hashes():
-    """بعد از ساخت یا ذخیره پسوردها، hash واقعی key.key و passwords.enc را در master.key بروزرسانی می‌کند"""
+    """Updates the actual hashes of key.key and passwords.enc in master.key after creating or saving passwords"""
     if not os.path.exists(MASTER_FILE):
         return
 
     with open(MASTER_FILE, "r") as f:
         lines = f.read().splitlines()
 
-    # خط اول: master hash (حفظ شود)
+    # Line 1: master hash (preserve)
     master_hash = lines[0] if len(lines) > 0 else "none"
-    # خط دوم: hash key.key
+    # Line 2: hash key.key
     key_hash = file_hash(KEY_FILE) or "none"
-    # خط سوم: hash passwords.enc
+    # Line 3: hash passwords.enc
     pass_hash = file_hash(PASS_FILE) or "none"
 
     with open(MASTER_FILE, "w") as f:
@@ -76,7 +76,7 @@ def update_master_hashes():
         f.write(key_hash + "\n")
         f.write(pass_hash)
 
-# --- پسوردها ---
+# --- Passwords ---
 def save_passwords(passwords):
     data = json.dumps(passwords).encode()
     encrypted = cipher.encrypt(data)

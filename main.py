@@ -1,6 +1,6 @@
 import PassGen
 import Pass2File
-from Pass2File import KEY_FILE, PASS_FILE, file_hash, hash_password, verify_integrity, update_master_hashes
+from Pass2File import hash_password, verify_integrity
 
 MASTER_FILE = "master.key"
 
@@ -17,7 +17,7 @@ def setup_master():
         exit()
 
     master_hash = hash_password(pwd)
-    # خط دوم و سوم را initially none بگذاریم
+    
     with open(MASTER_FILE, "w") as f:
         f.write(master_hash + "\n")
         f.write("none\n")
