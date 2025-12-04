@@ -34,3 +34,4 @@ build/
 # PassMan specific
 passwords.enc
 key.key
+master.key

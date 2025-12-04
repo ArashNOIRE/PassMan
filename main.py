@@ -1,17 +1,53 @@
 import PassGen
 import Pass2File
+import hashlib
+
+# Simple hashing function for passwords
+def hash_password(pwd):
+    return hashlib.sha256(pwd.encode()).hexdigest()
+
+MASTER_FILE = "master.key"
+
+def setup_master():
+    import os
+    if os.path.exists(MASTER_FILE):
+        return
+
+    pwd = input("Set a master password: ")
+    pwd2 = input("Confirm master password: ")
+
+    if pwd != pwd2:
+        print("Passwords do not match. Exiting.")
+        exit()
+
+    with open(MASTER_FILE, "w") as f:
+        f.write(hash_password(pwd))
+
+    print("Master password created!")
+
+def verify_master():
+    import os
+    if not os.path.exists(MASTER_FILE):
+        print("Master password file missing!")
+        exit()
+
+    with open(MASTER_FILE, "r") as f:
+        saved_hash = f.read().strip()
+
+    for attempt in range(3):
+        pwd = input("Enter master password: ")
+        if hash_password(pwd) == saved_hash:
+            print("Access granted.")
+            return True
+        else:
+            print("Wrong password.")
+
+    print("Too many attempts. Exiting.")
+    exit()
 
 # Initialize an empty dictionary to store passwords BTW: Not safe!
 Passwords={}
-### Test example of generating and saving a password
-#    NewPassword=PassGen.main("y","y","y","y",16)
-#   Passgogol = "Google.com"
-#   Passwords[Passgogol] = NewPassword
-#   Pass2File.save_passwords(Passwords)
-#
-#   Passwords = Pass2File.load_passwords()
-#   print("Loaded Passwords:", Passwords)# save to file
-###
+
 def add_password(website, password):
     Passwords[website] = password
     Pass2File.save_passwords(Passwords)
@@ -97,6 +133,9 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_master()
+    verify_master()
+
     print("Welcome to the Password Manager!")
     while True:
         main()
