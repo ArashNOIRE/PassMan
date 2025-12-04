@@ -1,8 +1,7 @@
 import PassGen
 import Pass2File
-from Pass2File import hash_password, verify_integrity
+from Pass2File import hash_password, verify_integrity, MASTER_FILE
 
-MASTER_FILE = "master.key"
 
 def setup_master():
     import os
@@ -99,18 +98,7 @@ def main():
     Passwords = Pass2File.load_passwords()
 
     if what == "add":
-        add_password(
-            input("Enter website: "),
-            input("Enter password (or type 'gen' to generate one): ")
-            if input("Generate password? (y/n): ") == "n"
-            else PassGen.main(
-                input("Include numbers? (y/n): "),
-                input("Include symbols? (y/n): "),
-                input("Include uppercase letters? (y/n): "),
-                input("Include lowercase letters? (y/n): "),
-                int(input("Enter password length: "))
-            )
-        )
+       add_password(input("Enter website: "), input("Enter password(or type 'gen' to generate one): ") if input("Generate password? (y/n): ") == "n" else PassGen.main(input("Include numbers? (y/n): "), input("Include symbols? (y/n): "), input("Include uppercase letters? (y/n): "), input("Include lowercase letters? (y/n): "), int(input("Enter password length: "))))
     elif what == "remove":
         remove_password(input("Enter website to remove: "))
     elif what == "see":

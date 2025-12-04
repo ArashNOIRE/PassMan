@@ -35,4 +35,5 @@ build/
 passwords.enc
 key.key
 master.key
+main.spec
 
