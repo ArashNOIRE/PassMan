@@ -1,10 +1,6 @@
 import PassGen
 import Pass2File
-from Pass2File import KEY_FILE, PASS_FILE, file_hash, hash_password
-
-
-# Making dependencys between key.key master.key and passwords.enc
-
+from Pass2File import KEY_FILE, PASS_FILE, file_hash, hash_password, verify_integrity, update_master_hashes
 
 MASTER_FILE = "master.key"
 
@@ -20,15 +16,14 @@ def setup_master():
         print("Passwords do not match. Exiting.")
         exit()
 
-    master_hash = hash_password(pwd) 
-    key_hash = "none"
-
+    master_hash = hash_password(pwd)
+    # خط دوم و سوم را initially none بگذاریم
     with open(MASTER_FILE, "w") as f:
         f.write(master_hash + "\n")
-        f.write(key_hash)
+        f.write("none\n")
+        f.write("none")
 
     print("Master password created!")
-
 
 def verify_master():
     import os
@@ -37,7 +32,8 @@ def verify_master():
         exit()
 
     with open(MASTER_FILE, "r") as f:
-        saved_hash = f.read().strip()
+        lines = f.read().splitlines()
+    saved_hash = lines[0]
 
     for attempt in range(3):
         pwd = input("Enter master password: ")
@@ -50,8 +46,8 @@ def verify_master():
     print("Too many attempts. Exiting.")
     exit()
 
-# Initialize an empty dictionary to store passwords BTW: Not safe!
-Passwords={}
+# --- dictionary ---
+Passwords = {}
 
 def add_password(website, password):
     Passwords[website] = password
@@ -59,13 +55,12 @@ def add_password(website, password):
     print(f"Password: {password} for {website} added.")
 
 def see_password():
-    sure=input("Are you sure you want to see all passwords? (y/n): ")
+    sure = input("Are you sure you want to see all passwords? (y/n): ")
     if sure.lower() == "y":
-            for site, pwd in Passwords.items():
-                print(f"{site}: {pwd}")
-    else:    
+        for site, pwd in Passwords.items():
+            print(f"{site}: {pwd}")
+    else:
         print("Cancelled.")
-        return
 
 def remove_password(website):
     if website in Passwords:
@@ -97,47 +92,43 @@ def search_password(website):
     else:
         print("Website not found.")
 
-
-
 def main():
     global Passwords
     what = input("What do you want to do? \n(add, remove, see, rename, change, search, exit): ")
-    Pass2File.verify_integrity()
+    verify_integrity()
     Passwords = Pass2File.load_passwords()
 
-
-
     if what == "add":
-        add_password(input("Enter website: "), input("Enter password (or type 'gen' to generate one): ") if input("Generate password? (y/n): ") == "n" else PassGen.main(input("Include numbers? (y/n): "), input("Include symbols? (y/n): "), input("Include uppercase letters? (y/n): "), input("Include lowercase letters? (y/n): "), int(input("Enter password length: "))))
-    
+        add_password(
+            input("Enter website: "),
+            input("Enter password (or type 'gen' to generate one): ")
+            if input("Generate password? (y/n): ") == "n"
+            else PassGen.main(
+                input("Include numbers? (y/n): "),
+                input("Include symbols? (y/n): "),
+                input("Include uppercase letters? (y/n): "),
+                input("Include lowercase letters? (y/n): "),
+                int(input("Enter password length: "))
+            )
+        )
     elif what == "remove":
-        remove_password(input("Enter website to remove: ")) 
-    
+        remove_password(input("Enter website to remove: "))
     elif what == "see":
         see_password()
-    
     elif what == "rename":
         rename_website(input("Enter old website name: "), input("Enter new website name: "))
-    
     elif what == "change":
         change_password(input("Enter website to change password: "), input("Enter new password: "))
-    
+    elif what == "search":
+        search_password(input("Enter website to search: "))
     elif what == "exit":
         print("Exiting Password Manager.")
         exit()
-        return
-    
-    elif what == "search":
-        search_password(input("Enter website to search: "))
-    
     elif what == "clear":
         import os
         os.system('cls' if os.name == 'nt' else 'clear')
-    
     else:
         print("Invalid option.")
-
-
 
 if __name__ == "__main__":
     setup_master()

@@ -7,7 +7,7 @@ KEY_FILE = "key.key"
 PASS_FILE = "passwords.enc"
 MASTER_FILE = "master.key"
 
-# Simple hashing function for passwords
+# --- کمکی‌ها ---
 def hash_password(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
 
@@ -17,18 +17,24 @@ def file_hash(path):
     with open(path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
 
-def update_key_hash():
-    if os.path.exists(PASS_FILE):
-        with open(KEY_FILE, "rb+") as f:
-            lines = f.read().splitlines()
-            key_data = lines[:-1] 
-            new_hash = file_hash(PASS_FILE).encode()
-            f.seek(0)
-            f.truncate()
-            for line in key_data:
-                f.write(line + b"\n")
-            f.write(new_hash)
+# --- کلید ---
+def load_key():
+    if os.path.exists(KEY_FILE):
+        with open(KEY_FILE, "rb") as f:
+            key = f.read()
+        if len(key) != 44:  # base64-encoded 32-byte key
+            raise ValueError("Invalid Fernet key in key.key")
+        return key
+    else:
+        key = Fernet.generate_key()
+        with open(KEY_FILE, "wb") as f:
+            f.write(key)
+        return key
 
+key = load_key()
+cipher = Fernet(key)
+
+# --- Integrity ---
 def verify_integrity():
     if not os.path.exists(MASTER_FILE):
         print("Error: master.key missing!")
@@ -37,45 +43,46 @@ def verify_integrity():
     with open(MASTER_FILE, "r") as f:
         lines = f.read().splitlines()
 
-    # بررسی خط دوم master.key
-    expected_key_hash = lines[1] if len(lines) > 1 else None
+    # خط دوم: hash کلید
+    expected_key_hash = lines[1] if len(lines) > 1 and lines[1] != "none" else None
     if expected_key_hash and expected_key_hash != file_hash(KEY_FILE):
         print("Error: key.key modified or invalid!")
         exit()
 
-    # بررسی key.key → passwords.enc
-    if os.path.exists(KEY_FILE) and os.path.exists(PASS_FILE):
-        with open(KEY_FILE, "rb") as f:
-            key_lines = f.read().splitlines()
-        if key_lines[-1].decode() != file_hash(PASS_FILE):
+    # خط سوم: hash پسوردها
+    expected_pass_hash = lines[2] if len(lines) > 2 and lines[2] != "none" else None
+    if expected_pass_hash and os.path.exists(PASS_FILE):
+        if expected_pass_hash != file_hash(PASS_FILE):
             print("Error: passwords.enc modified or corrupted!")
             exit()
 
+def update_master_hashes():
+    """بعد از ساخت یا ذخیره پسوردها، hash واقعی key.key و passwords.enc را در master.key بروزرسانی می‌کند"""
+    if not os.path.exists(MASTER_FILE):
+        return
 
-def load_key():
-    if os.path.exists(KEY_FILE):
-        return open(KEY_FILE, "rb").read()
-    else:
-        # ساخت کلید جدید
-        key = Fernet.generate_key()
-        with open(KEY_FILE, "wb") as f:
-            f.write(key)
+    with open(MASTER_FILE, "r") as f:
+        lines = f.read().splitlines()
 
-        # وابستگی با passwords.enc: ذخیره hash فایل پسورد در آخر key.key
-        if os.path.exists(PASS_FILE):
-            with open(KEY_FILE, "ab") as f:
-                f.write(b"\n" + file_hash(PASS_FILE).encode())
+    # خط اول: master hash (حفظ شود)
+    master_hash = lines[0] if len(lines) > 0 else "none"
+    # خط دوم: hash key.key
+    key_hash = file_hash(KEY_FILE) or "none"
+    # خط سوم: hash passwords.enc
+    pass_hash = file_hash(PASS_FILE) or "none"
 
-    return key
-key = load_key()
-cipher = Fernet(key)
+    with open(MASTER_FILE, "w") as f:
+        f.write(master_hash + "\n")
+        f.write(key_hash + "\n")
+        f.write(pass_hash)
 
+# --- پسوردها ---
 def save_passwords(passwords):
     data = json.dumps(passwords).encode()
     encrypted = cipher.encrypt(data)
     with open(PASS_FILE, "wb") as f:
         f.write(encrypted)
-    update_key_hash()
+    update_master_hashes()
 
 def load_passwords():
     if not os.path.exists(PASS_FILE):
