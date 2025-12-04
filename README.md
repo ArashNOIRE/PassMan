@@ -91,7 +91,7 @@ Please open an issue to discuss larger changes before submitting a pull request.
 
 ## License
 
-No license file included in the repository currently. If you'd like an open-source license (for example, MIT), add a `LICENSE` file and update this README.
+Check out ```LICENSE```.
 
 ## Contact
 
