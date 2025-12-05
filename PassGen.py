@@ -1,6 +1,10 @@
 import random as r
+
+# Password generator function
+# Parameters: UserwantNumber, UserwantSymbols, UserwantUpper, UserwantLower, UserLength
+# Returns: Generated password string or None if invalid input
 def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength):
-    # Options for the password (dictionery)
+    # Define character sets for password generation
     lower_letters = ["a","b","c","d","e","f","g","h","i","j",
                     "k","l","m","n","o","p","q","r","s","t",
                     "u","v","w","x","y","z"]
@@ -13,7 +17,7 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
                 "[", "]", "(", ")","`", ";", ":", "<", ">", "\\"]
     password = ""
 
-    # Options to choose
+    # Validate user input for numbers
     try:
         Fnum = UserwantNumber
         if Fnum not in ("y", "n"):
@@ -23,6 +27,7 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
         print("Please enter a valid input.")
         return None
 
+    # Validate user input for symbols
     try:
         Fsym = UserwantSymbols
         if Fsym not in ("y", "n"):
@@ -32,6 +37,7 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
         print("Please enter a valid input.")
         return None
 
+    # Validate user input for uppercase letters
     try:
         Fupr = UserwantUpper
         if Fupr not in ("y", "n"):
@@ -41,6 +47,7 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
         print("Please enter a valid input.")
         return None
 
+    # Validate user input for lowercase letters
     try:
         Flow = UserwantLower
         if Flow not in ("y", "n"):
@@ -50,6 +57,7 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
         print("Please enter a valid input.")
         return None
     
+    # Validate user input for password length
     try:
         Flen = UserLength
         if Flen <= 0:
@@ -59,20 +67,22 @@ def main(UserwantNumber, UserwantSymbols, UserwantUpper,UserwantLower,UserLength
         print("Please enter a valid input.")
         return None
 
+    # Build the character pool based on user preferences
     final_base = []
-    ## User choose what he/she wants
     if Fupr == "y":
         final_base += upper_letters
     if Fnum == "y":
-            final_base += numbers
+        final_base += numbers
     if Fsym == "y":
         final_base += symbols
     if Flow == "y":
        final_base += lower_letters
-    ### check if the inputs are valid
+    
+    # Generate password if character pool is not empty
     if len(final_base) == 0:
         return None
     else:
+        # Randomly select characters from the pool
         for i in range(Flen):
             password += r.choice(final_base)
         return password
